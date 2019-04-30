@@ -1,7 +1,8 @@
-package netwrok.services;
+package com.example.forcastapp.netwrok.services;
+
+import com.example.forcastapp.model.WeatherResponse;
 
 import io.reactivex.Observable;
-import model.WeatherResponse;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 

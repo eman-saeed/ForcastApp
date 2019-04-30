@@ -1,4 +1,4 @@
-package netwrok.model;
+package com.example.forcastapp.netwrok.model;
 
 
 import retrofit2.Retrofit;

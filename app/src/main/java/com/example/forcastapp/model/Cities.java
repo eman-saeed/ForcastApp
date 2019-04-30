@@ -1,4 +1,4 @@
-package model;
+package com.example.forcastapp.model;
 
 /**
  * Created by eman on 7/15/2017.
