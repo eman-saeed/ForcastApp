@@ -7,6 +7,7 @@ import android.databinding.DataBindingUtil;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -34,6 +35,9 @@ public class MainActivity extends AppCompatActivity {
 
         mainActivityViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
 
+        mainBinding.progressBar.setVisibility(View.VISIBLE);
+        mainBinding.weatherRecyclerView.setVisibility(View.GONE);
+
         mainActivityViewModel
                 .getWeather("london,UK", "b5b19a4019f771d7da6ccddc1ce9f213")
                 .observe(this, new Observer<WeatherResponse>() {
@@ -47,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
                             } else {
                                 mainBinding.weatherRecyclerView.getAdapter().notifyDataSetChanged();
                             }
+                            mainBinding.progressBar.setVisibility(View.GONE);
+                            mainBinding.weatherRecyclerView.setVisibility(View.VISIBLE);
                         }
                     }
                 });
