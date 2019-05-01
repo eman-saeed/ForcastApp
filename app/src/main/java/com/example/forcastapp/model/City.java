@@ -4,13 +4,13 @@ package com.example.forcastapp.model;
  * Created by eman on 7/15/2017.
  */
 
-public class Cities {
+public class City {
 
     int id;
     String name;
     String country;
 
-    public Cities(int id, String name, String country) {
+    public City(int id, String name, String country) {
         this.id = id;
         this.name = name;
         this.country = country;

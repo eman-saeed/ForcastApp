@@ -1,12 +1,20 @@
 package com.example.forcastapp.repositories;
 
 import android.arch.lifecycle.MutableLiveData;
+import android.content.Context;
 import android.util.Log;
 
-import com.example.forcastapp.model.Weather;
+import com.example.forcastapp.model.City;
 import com.example.forcastapp.model.WeatherResponse;
 import com.example.forcastapp.netwrok.model.ServiceProvider;
 import com.example.forcastapp.netwrok.services.WeatherService;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -60,6 +68,46 @@ public class ForecastRepository {
                 });
         return weather[0];
 
+    }
+
+    public ArrayList<City> getAllCities(Context context) {
+
+        String json = loadJSONFromAsset(context);
+
+        Gson gson = new Gson();
+        if (json != null) {
+            Type listType = new TypeToken<ArrayList<City>>() {
+            }.getType();
+            return (ArrayList<City>) gson.fromJson(json, listType);
+        }
+        return null;
+    }
+
+    private InputStream getStreamOnFile(String fileName, Context context) {
+        try {
+            return context.getAssets().open(fileName);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private String loadJSONFromAsset(Context context) {
+        String json = null;
+        try {
+            InputStream is = getStreamOnFile("city_list.json", context);
+            if (is != null) {
+                int size = is.available();
+                byte[] buffer = new byte[size];
+                is.read(buffer);
+                is.close();
+                json = new String(buffer, "UTF-8");
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return json;
     }
 
     //**************************************instance************************************************
