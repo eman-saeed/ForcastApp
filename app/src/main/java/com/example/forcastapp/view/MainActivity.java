@@ -1,13 +1,21 @@
 package com.example.forcastapp.view;
 
 import android.app.SearchManager;
+import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.database.Cursor;
+import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
+import android.location.Address;
+import android.location.Criteria;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.widget.CursorAdapter;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
@@ -15,7 +23,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.example.forcastapp.R;
 import com.example.forcastapp.adapters.SearchAdapter;
@@ -25,9 +32,12 @@ import com.example.forcastapp.model.City;
 import com.example.forcastapp.model.WeatherResponse;
 import com.example.forcastapp.viewmodel.MainActivityViewModel;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LocationListener {
 
     private ActivityMainBinding mainBinding;
     private MainActivityViewModel mainActivityViewModel;
@@ -35,6 +45,11 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<City> cities, citiesSearchList;
     private WeatherRecyclerViewAdapter weatherRecyclerViewAdapter;
     private SearchAdapter searchAdapter;
+
+    private static final int MY_PERMISSION_ACCESS_COURSE_LOCATION = 2;
+    private LocationManager locationManager;
+    private String provider;
+    private String currentCity;
 
 
     @Override
@@ -58,10 +73,15 @@ public class MainActivity extends AppCompatActivity {
         }
         //set the adapter for the search recyler view
         mainBinding.searchRecyclerView.setAdapter(searchAdapter);
+        //check for the current city if no cashed cities found
+        getCurrentCity();
+    }
+
+    private void callServiceIfNoCashedCities() {
         //get the data from the repo
         mainActivityViewModel
-                .getWeather("london,UK", "b5b19a4019f771d7da6ccddc1ce9f213")
-                .observe(this, new Observer<WeatherResponse>() {
+                .getWeather(currentCity)
+                .observe((LifecycleOwner) this, new Observer<WeatherResponse>() {
                     @Override
                     public void onChanged(@Nullable WeatherResponse weatherResponse) {
                         if (weatherResponseArrayList.size() < 4 && weatherResponse != null) {
@@ -77,6 +97,47 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    private void getCurrentCity() {
+        currentCity = "london,UK";/*if there is no city detected so it will be london by default*/
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                            android.Manifest.permission.ACCESS_COARSE_LOCATION},
+                    MY_PERMISSION_ACCESS_COURSE_LOCATION);
+            return;
+        }
+        //get the location then get the current city from the user location
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        Criteria criteria = new Criteria();
+        provider = locationManager.getBestProvider(criteria, false);
+        Location location = locationManager.getLastKnownLocation(provider);
+
+        if (location != null) {
+            onLocationChanged(location);
+        } else {
+            callServiceIfNoCashedCities();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSION_ACCESS_COURSE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //get the location then get the current city from the user location
+                    getCurrentCity();
+                } else {
+                    //call the service to get the weather with default value
+                    callServiceIfNoCashedCities();
+                }
+            }
+
+        }
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -133,5 +194,37 @@ public class MainActivity extends AppCompatActivity {
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        //You had this as int. It is advised to have Lat/Loing as double.
+        double lat = location.getLatitude();
+        double lng = location.getLongitude();
+
+        Geocoder geoCoder = new Geocoder(this, Locale.getDefault());
+        StringBuilder builder = new StringBuilder();
+        try {
+            List<Address> address = geoCoder.getFromLocation(lat, lng, 1);
+            currentCity = address.get(0).getSubAdminArea() + "," + address.get(0).getCountryName();
+        } catch (IOException e) {
+            // Handle IOException
+        } catch (NullPointerException e) {
+            // Handle NullPointerException
+        }
+        //get first city if no cashed cities found
+        callServiceIfNoCashedCities();
+    }
+
+    @Override
+    public void onStatusChanged(String s, int i, Bundle bundle) {
+    }
+
+    @Override
+    public void onProviderEnabled(String s) {
+    }
+
+    @Override
+    public void onProviderDisabled(String s) {
     }
 }

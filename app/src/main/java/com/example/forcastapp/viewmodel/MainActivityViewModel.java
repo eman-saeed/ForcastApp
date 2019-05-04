@@ -20,8 +20,8 @@ public class MainActivityViewModel extends ViewModel {
         forecastRepository = ForecastRepository.getInstance();
     }
 
-    public LiveData<WeatherResponse> getWeather(String city, String appId) {
-        return forecastRepository.getWeather(city, appId);
+    public LiveData<WeatherResponse> getWeather(String city) {
+        return forecastRepository.getWeather(city);
     }
 
     public ArrayList<City> getCities(Context context) {

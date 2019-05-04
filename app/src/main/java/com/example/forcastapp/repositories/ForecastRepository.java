@@ -24,12 +24,13 @@ import io.reactivex.schedulers.Schedulers;
 
 public class ForecastRepository {
 
+    private static String appId = "b5b19a4019f771d7da6ccddc1ce9f213";
     private static ForecastRepository ourInstance;
     private MutableLiveData<WeatherResponse> weatherLiveData;
 
-    public MutableLiveData<WeatherResponse> getWeather(String cityName, String appId) {
+    public MutableLiveData<WeatherResponse> getWeather(String cityName) {
         weatherLiveData = new MutableLiveData<>();
-        weatherLiveData.setValue(getWeatherFromServiceCAll(cityName, appId));
+        getWeatherFromServiceCAll(cityName);
         return weatherLiveData;
     }
 
@@ -39,8 +40,7 @@ public class ForecastRepository {
         return weatherResponse;
     }
 
-    private WeatherResponse getWeatherFromServiceCAll(String cityName, String appId) {
-        final WeatherResponse[] weather = {null};
+    private void getWeatherFromServiceCAll(String cityName) {
         WeatherService weatherService = ServiceProvider.createRetrofitService(WeatherService.class);
         weatherService.getWeatherByCityAndCountry(cityName, appId)
                 .subscribeOn(Schedulers.newThread())
@@ -66,8 +66,6 @@ public class ForecastRepository {
                     public void onComplete() {
                     }
                 });
-        return weather[0];
-
     }
 
     public ArrayList<City> getAllCities(Context context) {
