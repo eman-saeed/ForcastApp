@@ -11,13 +11,13 @@ import java.util.ArrayList;
 public class ForecastResponse extends BaseResponse{
 
     @SerializedName("list")
-    ArrayList<ForecastList> forecastLists;
+    ArrayList<Forecast> forecasts;
 
-    public ArrayList<ForecastList> getForecastLists() {
-        return forecastLists;
+    public ArrayList<Forecast> getForecasts() {
+        return forecasts;
     }
 
-    public void setForecastLists(ArrayList<ForecastList> forecastLists) {
-        this.forecastLists = forecastLists;
+    public void setForecasts(ArrayList<Forecast> forecasts) {
+        this.forecasts = forecasts;
     }
 }

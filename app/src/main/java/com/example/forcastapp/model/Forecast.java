@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
  * Created by eman
  */
 
-public class ForecastList {
+public class Forecast {
     @SerializedName("dt")
     double dt;
     @SerializedName("main")

@@ -5,8 +5,10 @@ import android.content.Context;
 import android.util.Log;
 
 import com.example.forcastapp.model.City;
+import com.example.forcastapp.model.ForecastResponse;
 import com.example.forcastapp.model.WeatherResponse;
 import com.example.forcastapp.netwrok.model.ServiceProvider;
+import com.example.forcastapp.netwrok.services.ForecastService;
 import com.example.forcastapp.netwrok.services.WeatherService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -24,9 +26,9 @@ import io.reactivex.schedulers.Schedulers;
 
 public class ForecastRepository {
 
-    private static String appId = "b5b19a4019f771d7da6ccddc1ce9f213";
-    private static ForecastRepository ourInstance;
+    private static String appId = "b6907d289e10d714a6e88b30761fae22";
     private MutableLiveData<WeatherResponse> weatherLiveData;
+    private MutableLiveData<ForecastResponse> forecastLiveData;
 
     public MutableLiveData<WeatherResponse> getWeather(String cityName) {
         weatherLiveData = new MutableLiveData<>();
@@ -34,10 +36,10 @@ public class ForecastRepository {
         return weatherLiveData;
     }
 
-    private WeatherResponse getStaticWeather() {
-        WeatherResponse weatherResponse = new WeatherResponse();
-        weatherResponse.setCityName("Benha");
-        return weatherResponse;
+    public MutableLiveData<ForecastResponse> getFiveDaysForecast(String cityName) {
+        forecastLiveData = new MutableLiveData<>();
+        getFiveDaysForecastFromService(cityName);
+        return forecastLiveData;
     }
 
     private void getWeatherFromServiceCAll(String cityName) {
@@ -60,6 +62,34 @@ public class ForecastRepository {
                     @Override
                     public void onError(@NonNull Throwable e) {
                         Log.e("from error", "error");
+                    }
+
+                    @Override
+                    public void onComplete() {
+                    }
+                });
+    }
+
+    private void getFiveDaysForecastFromService(String cityName) {
+        ForecastService forecastService = ServiceProvider.createRetrofitService(ForecastService.class);
+        forecastService.getForecastByCity(cityName, appId)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ForecastResponse>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                    }
+
+                    @Override
+                    public void onNext(@NonNull ForecastResponse forecastResponse) {
+                        if (forecastResponse != null && forecastResponse.getCode() == 200) {
+                            forecastLiveData.setValue(forecastResponse);
+                        }
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        Log.e("error", "error");
                     }
 
                     @Override
@@ -108,7 +138,9 @@ public class ForecastRepository {
         return json;
     }
 
-    //**************************************instance************************************************
+    //**************************************Singleton pattern************************************************
+    private static ForecastRepository ourInstance;
+
     private ForecastRepository() {
     }
 

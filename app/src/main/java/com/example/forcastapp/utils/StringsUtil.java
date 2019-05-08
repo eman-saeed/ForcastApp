@@ -13,4 +13,8 @@ public class StringsUtil {
     public static String getHumidity(String humidity) {
         return humidity + " %";
     }
+
+    public static String getTemp(double temp) {
+        return temp + " °C ";
+    }
 }

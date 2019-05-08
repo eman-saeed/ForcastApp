@@ -9,16 +9,19 @@ import android.view.ViewGroup;
 
 import com.example.forcastapp.R;
 import com.example.forcastapp.databinding.CityLayoutBinding;
+import com.example.forcastapp.listeners.CityClickedListener;
 import com.example.forcastapp.model.City;
 
 import java.util.ArrayList;
 
 public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder> {
 
-    ArrayList<City> cities;
+    private ArrayList<City> cities;
+    private CityClickedListener cityClickedListener;
 
-    public SearchAdapter(ArrayList<City> cities) {
+    public SearchAdapter(ArrayList<City> cities, CityClickedListener cityClickedListener) {
         this.cities = cities;
+        this.cityClickedListener = cityClickedListener;
     }
 
     @NonNull
@@ -32,6 +35,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
         City city = cities.get(i);
+        viewHolder.setCity(city.getName());
         viewHolder.cityLayoutBinding.setCity(city);
     }
 
@@ -46,13 +50,30 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
     }
 
     //*****************************************view holder*******************************************
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private CityLayoutBinding cityLayoutBinding;
+        private String city;
+
+        public String getCity() {
+            return city;
+        }
+
+        public void setCity(String city) {
+            this.city = city;
+        }
 
         public ViewHolder(@NonNull CityLayoutBinding cityLayoutBinding) {
             super(cityLayoutBinding.getRoot());
             this.cityLayoutBinding = cityLayoutBinding;
+            cityLayoutBinding.getRoot().setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            if (cityClickedListener != null) {
+                cityClickedListener.onCityClickedListener(city, true);
+            }
         }
     }
 }

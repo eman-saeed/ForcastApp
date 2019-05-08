@@ -6,4 +6,5 @@
     <string name="pressure">Pressure</string>
     <string name="humidity">Humidity</string>
     <string name="search_hint">Search for a city</string>
+    <string name="temp">Temp</string>
 </resources>

@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 
 import com.example.forcastapp.R;
 import com.example.forcastapp.databinding.WeatherRecyclerViewCellBinding;
+import com.example.forcastapp.listeners.CityClickedListener;
 import com.example.forcastapp.model.WeatherResponse;
 
 import java.util.ArrayList;
@@ -19,9 +20,11 @@ import java.util.ArrayList;
 public class WeatherRecyclerViewAdapter extends RecyclerView.Adapter<WeatherRecyclerViewAdapter.ViewHolder> {
 
     private ArrayList<WeatherResponse> weathers;
+    private CityClickedListener cityClickedListener;
 
-    public WeatherRecyclerViewAdapter(ArrayList<WeatherResponse> weathers) {
+    public WeatherRecyclerViewAdapter(ArrayList<WeatherResponse> weathers, CityClickedListener cityClickedListener) {
         this.weathers = weathers;
+        this.cityClickedListener = cityClickedListener;
     }
 
     @NonNull
@@ -40,6 +43,8 @@ public class WeatherRecyclerViewAdapter extends RecyclerView.Adapter<WeatherRecy
         viewHolder.viewCellBinding.setClouds(weatherResponse.getClouds());
         viewHolder.viewCellBinding.setWind(weatherResponse.getWind());
         viewHolder.viewCellBinding.setMain(weatherResponse.getMain());
+
+        viewHolder.setCityName(weatherResponse.getCityName());
     }
 
     @Override
@@ -48,13 +53,30 @@ public class WeatherRecyclerViewAdapter extends RecyclerView.Adapter<WeatherRecy
     }
 
     //***********************************************view holder*****************************************
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         public WeatherRecyclerViewCellBinding viewCellBinding;
+        private String CityName;
+
+        public void setCityName(String cityName) {
+            CityName = cityName;
+        }
+
+        public String getCityName() {
+            return CityName;
+        }
 
         public ViewHolder(@NonNull WeatherRecyclerViewCellBinding viewCellBinding) {
             super(viewCellBinding.getRoot());
             this.viewCellBinding = viewCellBinding;
+            viewCellBinding.getRoot().setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            if (cityClickedListener != null) {
+                cityClickedListener.onCityClickedListener(getCityName(), false);
+            }
         }
     }
 }

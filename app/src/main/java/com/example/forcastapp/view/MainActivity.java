@@ -5,6 +5,7 @@ import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.location.Address;
@@ -28,8 +29,10 @@ import com.example.forcastapp.R;
 import com.example.forcastapp.adapters.SearchAdapter;
 import com.example.forcastapp.adapters.WeatherRecyclerViewAdapter;
 import com.example.forcastapp.databinding.ActivityMainBinding;
+import com.example.forcastapp.listeners.CityClickedListener;
 import com.example.forcastapp.model.City;
 import com.example.forcastapp.model.WeatherResponse;
+import com.example.forcastapp.utils.Constants;
 import com.example.forcastapp.viewmodel.MainActivityViewModel;
 
 import java.io.IOException;
@@ -37,7 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements LocationListener {
+public class MainActivity extends AppCompatActivity implements LocationListener, CityClickedListener {
 
     private ActivityMainBinding mainBinding;
     private MainActivityViewModel mainActivityViewModel;
@@ -69,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         mainBinding.weatherRecyclerView.setVisibility(View.GONE);
         //init search recycler view
         if (searchAdapter == null) {
-            searchAdapter = new SearchAdapter(citiesSearchList);
+            searchAdapter = new SearchAdapter(citiesSearchList, this);
         }
         //set the adapter for the search recyler view
         mainBinding.searchRecyclerView.setAdapter(searchAdapter);
@@ -84,10 +87,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 .observe((LifecycleOwner) this, new Observer<WeatherResponse>() {
                     @Override
                     public void onChanged(@Nullable WeatherResponse weatherResponse) {
-                        if (weatherResponseArrayList.size() < 4 && weatherResponse != null) {
+                        if (weatherResponseArrayList.size() < 5 && weatherResponse != null) {
                             weatherResponseArrayList.add(weatherResponse);
                             if (weatherRecyclerViewAdapter == null) {
-                                weatherRecyclerViewAdapter = new WeatherRecyclerViewAdapter(weatherResponseArrayList);
+                                weatherRecyclerViewAdapter = new WeatherRecyclerViewAdapter(weatherResponseArrayList, MainActivity.this);
                                 mainBinding.weatherRecyclerView.setAdapter(weatherRecyclerViewAdapter);
                             } else {
                                 mainBinding.weatherRecyclerView.getAdapter().notifyDataSetChanged();
@@ -226,5 +229,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     @Override
     public void onProviderDisabled(String s) {
+    }
+
+    @Override
+    public void onCityClickedListener(String cityName, boolean fromSearch) {
+        //open the forecast activity with extra city name
+        Intent intent = new Intent(this, ForecastActivity.class);
+        intent.putExtra(Constants.CITY_NAME_EXTRA, cityName);
+        intent.putExtra(Constants.FROM_SEARCH, fromSearch);
+        startActivity(intent);
     }
 }

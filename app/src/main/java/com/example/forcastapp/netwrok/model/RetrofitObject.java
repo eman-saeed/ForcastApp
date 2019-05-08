@@ -11,7 +11,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitObject {
 
-    private static final String BASE_URL = "http://samples.openweathermap.org/data/2.5/";
+    private static final String BASE_URL = "https://openweathermap.org/data/2.5/";
 
     private static Retrofit ourInstance = null;
 
